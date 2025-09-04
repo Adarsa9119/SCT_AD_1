@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Simple Calculator with History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        #display {
+            width: 300px;
+            height: 50px;
+            font-size: 24px;
+            text-align: right;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #333;
+            border-radius: 4px;
+            user-select: none;
+            background: white;
+        }
+        .button-row {
+            display: flex;
+            width: 300px;
+            margin-bottom: 8px;
+        }
+        button {
+            flex: 1;
+            height: 60px;
+            font-size: 24px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background-color: #e0e0e0;
+        }
+        #history {
+            margin-top: 30px;
+            width: 320px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        #history h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 600;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+        }
+        .history-item {
+            font-size: 16px;
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Simple Calculator</h2>
+    <div id="display"></div>
+    <div class="button-row">
+        <button>7</button><button>8</button><button>9</button><button>/</button>
+    </div>
+    <div class="button-row">
+        <button>4</button><button>5</button><button>6</button><button>*</button>
+    </div>
+    <div class="button-row">
+        <button>1</button><button>2</button><button>3</button><button>-</button>
+    </div>
+    <div class="button-row">
+        <button id="clear">C</button><button>0</button><button id="equals">=</button><button>+</button>
+    </div>
+
+    <div id="history">
+        <h3>Calculation History</h3>
+        <div id="history-list"></div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const historyList = document.getElementById('history-list');
+        let expression = "";
+        let history = [];
+        let justCalculated = false; // Flag to detect if last action was calculation
+
+        // Update the calculator display
+        function updateDisplay() {
+            display.textContent = expression || "0";
+        }
+
+        // Add entry to history and update history display
+        function addToHistory(expr, result) {
+            history.push({ expr, result });
+            renderHistory();
+        }
+
+        // Render the history list in the history container
+        function renderHistory() {
+            historyList.innerHTML = "";
+            history.slice().reverse().forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.textContent = `${item.expr} = ${item.result}`;
+                historyList.appendChild(div);
+            });
+        }
+
+        // Event listeners for buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.textContent;
+
+                if (value === 'C') {
+                    expression = "";
+                    justCalculated = false;
+                    updateDisplay();
+                } else if (value === '=') {
+                    if (expression.trim() === "") return;
+                    try {
+                        const result = eval(expression);
+                        addToHistory(expression, result);
+                        expression = result.toString();
+                        justCalculated = true; // Mark calculation done
+                    } catch {
+                        expression = "Error";
+                        justCalculated = true;
+                    }
+                    updateDisplay();
+                } else {
+                    if (justCalculated) {
+                        // Clear expression when user starts new input after calculation
+                        expression = "";
+                        justCalculated = false;
+                    }
+                    if (expression === "Error") {
+                        expression = "";
+                    }
+                    expression += value;
+                    updateDisplay();
+                }
+            });
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html> 
